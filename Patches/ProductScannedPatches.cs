@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 using UnityEngine.UI;
 using MyBox;
 using UnityEngine.Networking.Match;
+using Button = UnityEngine.UI.Button;
 
 namespace DailySoldInventory.Patches
 {
@@ -57,6 +58,40 @@ namespace DailySoldInventory.Patches
 		}
 	}
 
+	[HarmonyPatch(typeof(TabManager))]
+	internal class TabManagerPatch
+	{
+		[HarmonyPatch(nameof(TabManager.Start))]
+		[HarmonyPrefix]
+		public static bool Start_Prefix()
+		{
+			if (!GameObject.Find("Daily Inventory Tab"))
+			{
+				DailySoldItemsSummarySMSMODPlugin.Log.LogInfo("Daily Inventory Tab not Found, creation...");
+				CreateDailyTab();
+			}
+			else
+			{
+				DailySoldItemsSummarySMSMODPlugin.Log.LogInfo("Daily Inventory Tab Found, skipping ...");
+			}
+			return true;
+		}
+
+		static void CreateDailyTab()
+		{
+			GameObject dailyTab = GameObject.Instantiate(GameObject.Find("Products Tab"));
+			dailyTab.name = "Daily Inventory Tab";
+			GameObject managementApp = GameObject.FindObjectsOfType<AppWindow>(true).FirstOrDefault(x => x.gameObject.name == "Management App").gameObject;
+			dailyTab.transform.SetParent(managementApp.transform.GetChild(3));
+			DailySoldItemsSummarySMSMODPlugin.Log.LogInfo("Duplicated Products Tab");
+			GameObject customization = GameObject.Find("Customization Tab Button");
+			customization.SetActive(false);
+			GameObject dailyButton = GameObject.Instantiate(customization, customization.transform.parent.GetChild(0));
+			dailyButton.GetComponent<Button>().onClick.RemoveAllListeners();
+			dailyButton.GetComponent<Button>().onClick.AddListener()=>
+		}
+	}
+
 	[HarmonyPatch(typeof(DailyStatisticsManager))]
 	internal class DailyStatisticsManagerPatch
 	{
@@ -67,7 +102,7 @@ namespace DailySoldInventory.Patches
 		public static bool OnDayFinished_Prefix()
 		{
 			//UI STUFF HERE
-			TestUI();
+			//TestUI();
 			//CreateDailySellsUI();
 			return true;
 		}

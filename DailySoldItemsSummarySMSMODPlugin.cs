@@ -23,6 +23,7 @@ namespace DailySoldInventory
 		{
 			// Apply all of our patches
 			Logger.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loading...");
+			Application.runInBackground = true;
 			Harmony.PatchAll();
 			Logger.LogInfo($"PluginName: {PluginName}, VersionString: {VersionString} is loaded.");
 
